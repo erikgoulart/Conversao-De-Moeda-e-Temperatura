@@ -1,5 +1,3 @@
-# conversor_funcoes.py
-
 # Taxas de câmbio fixas (exemplo)
 RATES = {
     ('USD', 'BRL'): 5.0,
