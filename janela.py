@@ -6,7 +6,7 @@ class ConversorApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Conversor - Temperatura & Moeda")
-        self.geometry("400x250")
+        self.geometry("220x200")
         self.resizable(False, False)
 
         notebook = ttk.Notebook(self)
