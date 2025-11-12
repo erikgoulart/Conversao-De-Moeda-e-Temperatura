@@ -1,79 +1,126 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from conversor import celsius_para_fahrenheit, fahrenheit_para_celsius, converter_moeda
+from conversor import converter
 
-class ConversorApp(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("Conversor - Temperatura & Moeda")
-        self.geometry("220x200")
-        self.resizable(False, False)
+# ======== FUNÇÕES ========
 
-        notebook = ttk.Notebook(self)
-        self.temp_frame = ttk.Frame(notebook)
-        self.money_frame = ttk.Frame(notebook)
-        notebook.add(self.temp_frame, text="Temperatura")
-        notebook.add(self.money_frame, text="Moeda")
-        notebook.pack(fill='both', expand=True, padx=10, pady=10)
+def mostrar_tela_inicial():
+    """Exibe a tela inicial."""
+    limpar_tela()
+    tk.Label(janela, text="Conversor Universal 🌍", font=("Arial", 14, "bold")).pack(pady=20)
+    tk.Label(janela, text="O que você deseja converter?", font=("Arial", 11)).pack(pady=10)
 
-        self.build_temp_tab()
-        self.build_money_tab()
+    tk.Button(janela, text="💱 Moedas", font=("Arial", 11, "bold"),
+              width=20, bg="#2E8B57", fg="white", command=mostrar_tela_moedas).pack(pady=5)
+    tk.Button(janela, text="🌡️ Temperaturas", font=("Arial", 11, "bold"),
+              width=20, bg="#1E90FF", fg="white", command=mostrar_tela_temperatura).pack(pady=5)
+    tk.Button(janela, text="❌ Sair", font=("Arial", 10), command=janela.quit).pack(pady=20)
 
-    # Aba de temperatura
-    def build_temp_tab(self):
-        frm = self.temp_frame
-        ttk.Label(frm, text="Valor:").grid(column=0, row=0, padx=5, pady=5)
-        self.temp_val = tk.StringVar()
-        ttk.Entry(frm, textvariable=self.temp_val).grid(column=1, row=0)
-        self.temp_dir = tk.StringVar(value="CtoF")
-        ttk.Radiobutton(frm, text="Celsius → Fahrenheit", variable=self.temp_dir, value="CtoF").grid(column=0, row=1, columnspan=2, sticky="w")
-        ttk.Radiobutton(frm, text="Fahrenheit → Celsius", variable=self.temp_dir, value="FtoC").grid(column=0, row=2, columnspan=2, sticky="w")
-        ttk.Button(frm, text="Converter", command=self.on_convert_temp).grid(column=0, row=3, columnspan=2, pady=10)
-        self.temp_result = ttk.Label(frm, text="Resultado: -")
-        self.temp_result.grid(column=0, row=4, columnspan=2)
 
-    def on_convert_temp(self):
+def mostrar_tela_moedas():
+    """Tela de conversão de moedas."""
+    limpar_tela()
+    tk.Label(janela, text="Conversão de Moedas 💱", font=("Arial", 14, "bold")).pack(pady=15)
+
+    tk.Label(janela, text="Valor:", font=("Arial", 11)).pack()
+    entry_valor = tk.Entry(janela, font=("Arial", 11))
+    entry_valor.pack(pady=5)
+
+    frame = tk.Frame(janela)
+    frame.pack(pady=10)
+
+    moedas = ["BRL", "USD", "EUR", "GBP", "JPY", "CAD", "ARS", "CHF"]
+
+    tk.Label(frame, text="De:").grid(row=0, column=0)
+    combo_de = ttk.Combobox(frame, values=moedas, width=10)
+    combo_de.set("USD")
+    combo_de.grid(row=0, column=1, padx=5)
+
+    tk.Label(frame, text="Para:").grid(row=0, column=2)
+    combo_para = ttk.Combobox(frame, values=moedas, width=10)
+    combo_para.set("BRL")
+    combo_para.grid(row=0, column=3, padx=5)
+
+    label_resultado = tk.Label(janela, text="", font=("Arial", 12, "bold"))
+    label_resultado.pack(pady=10)
+
+    def realizar_conversao():
         try:
-            v = float(self.temp_val.get())
-            if self.temp_dir.get() == "CtoF":
-                r = celsius_para_fahrenheit(v)
-                self.temp_result.config(text=f"Resultado: {r:.2f} °F")
+            valor = float(entry_valor.get())
+            de = combo_de.get()
+            para = combo_para.get()
+            resultado = converter(valor, de, para)
+            if resultado is not None:
+                label_resultado.config(text=f"{valor:.2f} {de} = {resultado:.2f} {para}")
             else:
-                r = fahrenheit_para_celsius(v)
-                self.temp_result.config(text=f"Resultado: {r:.2f} °C")
+                messagebox.showerror("Erro", f"Conversão de {de} para {para} não encontrada.")
         except ValueError:
-            messagebox.showerror("Erro", "Digite um número válido.")
+            messagebox.showerror("Erro", "Digite um valor numérico válido.")
 
-    # Aba de moeda
-    def build_money_tab(self):
-        frm = self.money_frame
-        ttk.Label(frm, text="Valor:").grid(column=0, row=0, padx=5, pady=5)
-        self.money_val = tk.StringVar()
-        ttk.Entry(frm, textvariable=self.money_val).grid(column=1, row=0)
-        ttk.Label(frm, text="De:").grid(column=0, row=1)
-        ttk.Label(frm, text="Para:").grid(column=0, row=2)
-        currencies = ['BRL', 'USD', 'EUR']
-        self.money_from = tk.StringVar(value="USD")
-        self.money_to = tk.StringVar(value="BRL")
-        ttk.OptionMenu(frm, self.money_from, self.money_from.get(), *currencies).grid(column=1, row=1)
-        ttk.OptionMenu(frm, self.money_to, self.money_to.get(), *currencies).grid(column=1, row=2)
-        ttk.Button(frm, text="Converter", command=self.on_convert_money).grid(column=0, row=3, columnspan=2, pady=10)
-        self.money_result = ttk.Label(frm, text="Resultado: -")
-        self.money_result.grid(column=0, row=4, columnspan=2)
+    tk.Button(janela, text="Converter", font=("Arial", 11, "bold"),
+              bg="#2E8B57", fg="white", command=realizar_conversao).pack(pady=5)
 
-    def on_convert_money(self):
+    tk.Button(janela, text="⬅️ Voltar", command=mostrar_tela_inicial).pack(pady=10)
+
+
+def mostrar_tela_temperatura():
+    """Tela de conversão de temperatura."""
+    limpar_tela()
+    tk.Label(janela, text="Conversão de Temperatura 🌡️", font=("Arial", 14, "bold")).pack(pady=15)
+
+    tk.Label(janela, text="Valor:", font=("Arial", 11)).pack()
+    entry_valor = tk.Entry(janela, font=("Arial", 11))
+    entry_valor.pack(pady=5)
+
+    frame = tk.Frame(janela)
+    frame.pack(pady=10)
+
+    temperaturas = ["C", "F", "K"]
+
+    tk.Label(frame, text="De:").grid(row=0, column=0)
+    combo_de = ttk.Combobox(frame, values=temperaturas, width=10)
+    combo_de.set("C")
+    combo_de.grid(row=0, column=1, padx=5)
+
+    tk.Label(frame, text="Para:").grid(row=0, column=2)
+    combo_para = ttk.Combobox(frame, values=temperaturas, width=10)
+    combo_para.set("F")
+    combo_para.grid(row=0, column=3, padx=5)
+
+    label_resultado = tk.Label(janela, text="", font=("Arial", 12, "bold"))
+    label_resultado.pack(pady=10)
+
+    def realizar_conversao():
         try:
-            valor = float(self.money_val.get())
-            de = self.money_from.get()
-            para = self.money_to.get()
-            resultado = converter_moeda(valor, de, para)
-            if resultado:
-                self.money_result.config(text=f"Resultado: {resultado:.2f} {para}")
+            valor = float(entry_valor.get())
+            de = combo_de.get()
+            para = combo_para.get()
+            resultado = converter(valor, de, para)
+            if resultado is not None:
+                label_resultado.config(text=f"{valor:.2f}°{de} = {resultado:.2f}°{para}")
             else:
-                messagebox.showerror("Erro", f"Conversão não disponível: {de} → {para}")
+                messagebox.showerror("Erro", f"Conversão de {de} para {para} não encontrada.")
         except ValueError:
-            messagebox.showerror("Erro", "Digite um número válido.")
+            messagebox.showerror("Erro", "Digite um valor numérico válido.")
 
-if __name__ == "__main__":
-    app = ConversorApp()
-    app.mainloop()
+    tk.Button(janela, text="Converter", font=("Arial", 11, "bold"),
+              bg="#1E90FF", fg="white", command=realizar_conversao).pack(pady=5)
+
+    tk.Button(janela, text="⬅️ Voltar", command=mostrar_tela_inicial).pack(pady=10)
+
+
+def limpar_tela():
+    """Remove todos os widgets da janela atual."""
+    for widget in janela.winfo_children():
+        widget.destroy()
+
+
+# ======== INICIALIZAÇÃO ========
+
+janela = tk.Tk()
+janela.title("Conversor Universal 🌍")
+janela.geometry("360x300")
+
+mostrar_tela_inicial()
+
+janela.mainloop()
