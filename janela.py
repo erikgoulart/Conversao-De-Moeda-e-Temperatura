@@ -29,7 +29,7 @@ def mostrar_tela_moedas():
     frame = tk.Frame(janela)
     frame.pack(pady=10)
 
-    moedas = ["BRL", "USD", "EUR", "GBP", "JPY", "CAD", "ARS", "CHF"]
+    moedas = ["BRL", "USD", "EUR"]
 
     tk.Label(frame, text="De:").grid(row=0, column=0)
     combo_de = ttk.Combobox(frame, values=moedas, width=10)
